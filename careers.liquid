@@ -1,0 +1,491 @@
+{% comment %}
+  Careers Page – Inline Form Approach (Fail-Safe)
+{% endcomment %}
+
+<section id="careers-{{ section.id }}" class="careers-section">
+  <div class="careers-inner">
+    <header class="careers-header">
+        <h1 class="careers-title">{{ section.settings.heading }}</h1>
+
+        {% if section.settings.small_heading != blank %}
+            <h4 class="careers-small-heading">{{ section.settings.small_heading }}</h4>
+        {% endif %}
+
+        <p class="careers-subtitle">{{ section.settings.subheading }}</p>
+
+        {% if section.settings.department_heading != blank %}
+            <h4 class="careers-dept-heading">{{ section.settings.department_heading }}</h4>
+        {% endif %}
+
+      <div class="careers-category-filters" role="tablist">
+        <button class="careers-filter-btn is-active" data-careers-filter="all" type="button">{{ section.settings.filter_all_label }}</button>
+        <button class="careers-filter-btn" data-careers-filter="corporate" type="button">{{ section.settings.filter_corporate_label }}</button>
+        <button class="careers-filter-btn" data-careers-filter="warehouse" type="button">{{ section.settings.filter_warehouse_label }}</button>
+      </div>
+    </header>
+
+    <div class="careers-layout">
+      <div class="careers-job-list">
+        {% assign categories = "corporate,warehouse" | split: "," %}
+
+        {% for cat in categories %}
+          {% assign cat_handle = cat | strip %}
+          {% if cat_handle == "corporate" %}
+            {% assign cat_label = section.settings.corporate_group_heading %}
+          {% else %}
+            {% assign cat_label = section.settings.warehouse_group_heading %}
+          {% endif %}
+
+          <div class="careers-category-group" data-careers-category-group="{{ cat_handle }}">
+            <h2 class="careers-category-heading">{{ cat_label }}</h2>
+
+            {% assign has_jobs = false %}
+            {% for block in section.blocks %}
+              {% if block.type == 'job' and block.settings.category == cat_handle %}
+                {% assign has_jobs = true %}
+                <article
+                  class="careers-job-card"
+                  data-careers-job
+                  data-careers-category="{{ block.settings.category }}"
+                  data-job-id="{{ block.id }}"
+                  tabindex="0"
+                  role="button"
+                >
+                  <div class="careers-job-main">
+                    <h3 class="careers-job-title">{{ block.settings.title }}</h3>
+
+                    <div class="careers-job-tags">
+                      {% if block.settings.department_tag != blank %}
+                        <span class="careers-tag">{{ block.settings.department_tag }}</span>
+                      {% endif %}
+                      {% if block.settings.type_tag != blank %}
+                        <span class="careers-tag">{{ block.settings.type_tag }}</span>
+                      {% endif %}
+                      {% if block.settings.location_tag != blank %}
+                        <span class="careers-tag">{{ block.settings.location_tag }}</span>
+                      {% endif %}
+                      {% if block.settings.extra_tags != blank %}
+                        {% assign extra_tags = block.settings.extra_tags | split: ',' %}
+                        {% for tag in extra_tags %}
+                          {% assign t = tag | strip %}
+                          {% if t != blank %}<span class="careers-tag">{{ t }}</span>{% endif %}
+                        {% endfor %}
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  <div class="careers-job-cta">
+                    <button
+                      type="button"
+                      class="careers-apply-pill"
+                      data-trigger-apply="true"
+                    >
+                      {{ section.settings.apply_button_label }}
+                    </button>
+                  </div>
+
+                  <div class="careers-job-detail-data" hidden>
+                    <div class="careers-detail-layout">
+                      <div class="careers-detail-left">
+                        <button type="button" class="careers-back-btn" data-careers-back>← {{ section.settings.back_label }}</button>
+
+                        <div class="careers-job-detail-header">
+                          <h2>{{ block.settings.title }}</h2>
+                          <div class="careers-job-detail-meta">
+                            {% if block.settings.location_tag != blank %}<span>{{ block.settings.location_tag }}</span>{% endif %}
+                            {% if block.settings.type_tag != blank %}<span>{{ block.settings.type_tag }}</span>{% endif %}
+                          </div>
+                        </div>
+
+                        {% if block.settings.benefits != blank %}
+                          <div class="careers-job-detail-section careers-benefits-section">
+                            <h3>{{ section.settings.benefits_heading }}</h3>
+                            <div class="careers-job-detail-text careers-job-detail-list">{{ block.settings.benefits }}</div>
+                          </div>
+                        {% endif %}
+
+                        <div class="careers-job-detail-footer">
+                          
+                          <button
+                            type="button"
+                            class="careers-apply-btn"
+                            data-toggle-form
+                          >
+                            {{ section.settings.apply_button_label }}
+                          </button>
+
+                          <div class="careers-inline-form-wrapper" hidden>
+                            <div class="careers-inline-form-box">
+                                <h3 class="careers-form-heading">Apply for {{ block.settings.title }}</h3>
+                                
+                                {% assign formId = 'contact-form-' | append: block.id %}
+                                {% form 'contact', id: formId %}
+                                    
+                                    <input type="hidden" name="contact[Job Title]" value="{{ block.settings.title }}">
+
+                                    <div class="careers-form-grid">
+                                        <div class="careers-form-field careers-form-field-full">
+                                            <label>Resume/CV<span class="careers-required">✱</span></label>
+                                            <input type="file" name="contact[Resume / CV]" required>
+                                        </div>
+                                        <div class="careers-form-field">
+                                            <label>Full name<span class="careers-required">✱</span></label>
+                                            <input type="text" name="contact[Name]" required>
+                                        </div>
+                                        <div class="careers-form-field">
+                                            <label>Email<span class="careers-required">✱</span></label>
+                                            <input type="email" name="contact[email]" required>
+                                        </div>
+                                        <div class="careers-form-field">
+                                            <label>Phone</label>
+                                            <input type="tel" name="contact[Phone]">
+                                        </div>
+                                        <div class="careers-form-field">
+                                            <label>Current location<span class="careers-required">✱</span></label>
+                                            <input type="text" name="contact[Current location]" required>
+                                        </div>
+                                        <div class="careers-form-field">
+                                            <label>Current company</label>
+                                            <input type="text" name="contact[Current company]">
+                                        </div>
+                                        <div class="careers-form-field careers-form-field-full">
+                                            <label>LinkedIn URL</label>
+                                            <input type="url" name="contact[LinkedIn URL]" placeholder="https://linkedin.com/in/username">
+                                        </div>
+                                        <div class="careers-form-field careers-form-field-full">
+                                            <label>Additional information</label>
+                                            <textarea name="contact[Additional information]" rows="3"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="careers-form-submit">Submit Application</button>
+
+                                    {% if form.posted_successfully? %}
+                                        <p class="careers-form-success">Thank you! Your application has been submitted.</p>
+                                    {% endif %}
+                                    {% if form.errors %}
+                                        <ul class="careers-form-errors">
+                                        {% for field in form.errors %}
+                                            <li>{{ form.errors.messages[field] }}</li>
+                                        {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endform %}
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+
+                      <div class="careers-detail-right">
+                        {% if block.settings.about != blank %}
+                          <div class="careers-job-detail-section">
+                            <h3>{{ section.settings.about_heading }}</h3>
+                            <div class="careers-job-detail-text">{{ block.settings.about }}</div>
+                          </div>
+                        {% endif %}
+                        {% if block.settings.qualifications != blank %}
+                          <div class="careers-job-detail-section">
+                            <h3>{{ section.settings.qualifications_heading }}</h3>
+                            <div class="careers-job-detail-text careers-job-detail-list">{{ block.settings.qualifications }}</div>
+                          </div>
+                        {% endif %}
+                        {% if block.settings.responsibilities != blank %}
+                          <div class="careers-job-detail-section">
+                            <h3>{{ section.settings.responsibilities_heading }}</h3>
+                            <div class="careers-job-detail-text careers-job-detail-list">{{ block.settings.responsibilities }}</div>
+                          </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              {% endif %}
+            {% endfor %}
+
+            {% unless has_jobs %}
+              <p class="careers-no-jobs" data-careers-empty-for="{{ cat_handle }}">{{ section.settings.no_jobs_label }}</p>
+            {% endunless %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <aside class="careers-job-detail-panel" data-careers-detail-panel>
+        <div class="careers-job-detail-placeholder">
+          <h2>{{ section.settings.detail_placeholder_heading }}</h2>
+          <p>{{ section.settings.detail_placeholder_text }}</p>
+        </div>
+        <div class="careers-job-detail-content" hidden data-careers-detail-content></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+{% style %}
+  /* --- Layout & Basic Styles --- */
+  .careers-section { padding: 4rem 1.5rem 5rem; }
+  .careers-inner { max-width: 1100px; margin: 0 auto; }
+  .careers-header { text-align: center; margin-bottom: 3rem; }
+  .careers-title { font-size: clamp(2.4rem, 3vw, 3rem); margin-bottom: 0.75rem; }
+  .careers-subtitle { max-width: 600px; margin: 0 auto 1.75rem; color: #666; }
+  .careers-category-filters { display: inline-flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+  .careers-filter-btn { border-radius: 999px; padding: 1rem 1.6rem; border: 1px solid #000; background: #fff; cursor: pointer; font-size: 0.95rem; height: 47px; line-height: 1; transition: 0.2s ease; }
+  .careers-filter-btn.is-active { background: #000; color: #fff; }
+  .careers-filter-btn:active { transform: scale(0.97); }
+
+  .careers-layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.1fr); gap: 2.5rem; align-items: flex-start; }
+  .careers-job-list { display: flex; flex-direction: column; gap: 2.5rem; }
+  .careers-category-heading { font-size: 1.2rem; margin-bottom: 1.25rem; }
+
+  /* Job Card */
+  .careers-job-card { border-radius: 2rem; border: 1px solid #ddd; padding: 1.5rem 1.75rem; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; cursor: pointer; transition: 0.2s ease; background: #fff; outline: none; }
+  .careers-job-card:hover, .careers-job-card.is-active { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); border-color: #000; }
+  .careers-job-main { min-width: 0; }
+  .careers-job-title { font-size: 1.05rem; margin-bottom: 0.75rem; }
+  .careers-job-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .careers-tag { border-radius: 999px; padding: 0.5rem 0.9rem; font-size: 0.8rem; background: #f6f9fb; border: 1px solid #e2e9f0; white-space: nowrap; line-height: 1; }
+  .careers-apply-pill { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: 0.7rem 1.8rem; background: #000; color: #fff; font-size: 0.9rem; font-weight: 500; border:none; cursor: pointer; line-height:1.6; }
+  .careers-no-jobs { font-size: 0.9rem; color: #777; margin-top: 0.5rem; }
+  .careers-small-heading { font-size: 0.95rem; letter-spacing: 0.08em; text-transform: uppercase; color: #777; margin-bottom: 0.5rem; }
+  .careers-dept-heading { font-size: 0.95rem; text-transform: uppercase; color: #555; margin: 2rem 0 1rem; }
+
+  /* Detail Panel */
+  .careers-job-detail-panel { border-radius: 1.75rem; padding: 2rem 2rem 2.5rem; background: #050608; color: #f6f6f6; position: sticky; top: 4.5rem; }
+  .careers-job-detail-placeholder h2 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+  .careers-job-detail-placeholder p { color: #b5b5b5; font-size: 0.95rem; }
+  .careers-detail-layout { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.35fr); gap: 3rem; align-items: flex-start; }
+  .careers-detail-left { position: sticky; top: 4.5rem; }
+  .careers-back-btn { border: none; background: transparent; color: #b8bcc4; font-size: 0.9rem; margin-bottom: 1.25rem; cursor: pointer; padding: 0; }
+  .careers-job-detail-header h2 { font-size: 1.6rem; margin-bottom: 0.4rem; }
+  .careers-job-detail-meta { display: flex; gap: 0.6rem; flex-wrap: wrap; font-size: 0.85rem; color: #b8bcc4; margin-bottom: 1.4rem; }
+  .careers-benefits-section { margin-top: 2rem; }
+  .careers-job-detail-section { margin-bottom: 1.5rem; }
+  .careers-job-detail-section h3 { font-size: 0.95rem; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.6rem; color: #b8bcc4; }
+  .careers-job-detail-text { font-size: 0.95rem; line-height: 1.7; color: #f5f5f5; }
+  .careers-job-detail-list ul { margin-left: 1.25rem; padding-left: 1rem; list-style: disc; }
+  .careers-job-detail-list ol { margin-left: 1.25rem; padding-left: 1rem; list-style: decimal; }
+  
+  .careers-detail-right { padding-bottom: 1rem; }
+
+  /* Open State */
+  .careers-section.is-detail-open .careers-layout { grid-template-columns: minmax(0, 1fr); }
+  .careers-section.is-detail-open .careers-job-list { display: none; }
+  .careers-section.is-detail-open .careers-job-detail-panel { position: static; max-width: 1100px; margin: 0 auto; }
+  .careers-detail-right { background: #fff !important; color: #000 !important; padding: 1.5rem; border-radius: 1.25rem; }
+  .careers-detail-right h1, .careers-detail-right h2, .careers-detail-right h3, .careers-detail-right p, .careers-detail-right span, .careers-detail-right li, .careers-detail-right a { color: #000 !important; }
+
+  /* --- NEW INLINE FORM STYLES --- */
+  .careers-apply-btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: 0.9rem 2.2rem; background: #fff; color: #000; font-weight: 500; font-size: 0.95rem; text-decoration: none; border: none; cursor: pointer; width: 100%; margin-top: 2rem; }
+  .careers-apply-btn:hover { background: #f0f0f0; }
+
+  .careers-inline-form-wrapper { margin-top: 1.5rem; animation: slideDown 0.4s ease forwards; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .careers-inline-form-box { background: #fff; color: #000; padding: 1.5rem; border-radius: 1.5rem; border: 1px solid #ddd; }
+  .careers-form-heading { font-size: 1.1rem; margin-bottom: 1.25rem; font-weight: 600; color: #000; }
+  
+  .careers-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  .careers-form-field-full { grid-column: 1 / -1; }
+  .careers-form-field label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem; color: #333; }
+  .careers-required { color: #e53935; margin-left: 2px; }
+  .careers-form-field input, .careers-form-field textarea { width: 100%; border-radius: 0.5rem; border: 1px solid #ccc; padding: 0.6rem; font-size: 0.9rem; background: #fff; color: #000; }
+  .careers-form-field input:focus, .careers-form-field textarea:focus { border-color: #000; outline: none; }
+  
+  .careers-form-submit { display: inline-flex; width: 100%; justify-content: center; border-radius: 999px; padding: 0.8rem; border: none; background: #000; color: #fff; font-weight: 600; cursor: pointer; }
+  .careers-form-success { color: green; font-size: 0.9rem; margin-top: 1rem; }
+  .careers-form-errors { color: red; font-size: 0.9rem; margin-top: 1rem; list-style: none; padding: 0; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .careers-layout { grid-template-columns: 1fr; }
+    .careers-job-detail-panel { position: static; order: -1; padding: 1rem 1rem 1.5rem; }
+    .careers-detail-layout { grid-template-columns: 1fr; gap: 2rem; }
+    .careers-detail-left { position: static; }
+  }
+  @media (max-width: 600px) {
+    .careers-job-card { flex-direction: column; align-items: flex-start; }
+    .careers-job-cta { width: 100%; }
+    .careers-apply-pill { width: 100%; }
+    .careers-section { padding: 2rem 1.0rem 5rem; }
+    .careers-form-grid { grid-template-columns: 1fr; }
+  }
+  
+  .careers-job-detail-content { opacity: 0; transform: translateY(20px); transition: opacity 0.35s ease, transform 0.35s ease; }
+  .careers-section.is-detail-open .careers-job-detail-content.animate-in { opacity: 1; transform: translateY(0); }
+{% endstyle %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const root = document.getElementById('careers-{{ section.id }}');
+    if (!root) return;
+
+    const filterButtons = root.querySelectorAll('[data-careers-filter]');
+    const jobCards = root.querySelectorAll('[data-careers-job]');
+    const detailPanel = root.querySelector('[data-careers-detail-panel]');
+    const detailContent = root.querySelector('[data-careers-detail-content]');
+    const placeholder = detailPanel.querySelector('.careers-job-detail-placeholder');
+    const groups = root.querySelectorAll('[data-careers-category-group]');
+
+    /* --- 1. OPEN DETAIL LOGIC --- */
+    function closeDetail() {
+      root.classList.remove('is-detail-open');
+      detailContent.classList.remove('animate-in');
+      detailContent.hidden = true;
+      detailContent.innerHTML = '';
+      placeholder.style.display = '';
+      jobCards.forEach((c) => c.classList.remove('is-active'));
+      window.scrollTo({ top: root.offsetTop - 40, behavior: 'smooth' });
+    }
+
+    function openJob(card, autoScrollToForm = false) {
+      if (!card) return;
+
+      jobCards.forEach((c) => c.classList.remove('is-active'));
+      card.classList.add('is-active');
+
+      const data = card.querySelector('.careers-job-detail-data');
+      if (!data) return;
+
+      // Copy HTML from hidden template to visible panel
+      detailContent.innerHTML = data.innerHTML;
+      detailContent.hidden = false;
+      placeholder.style.display = 'none';
+
+      requestAnimationFrame(() => {
+        detailContent.classList.add('animate-in');
+      });
+
+      root.classList.add('is-detail-open');
+
+      // Initialize Back Button
+      const backBtn = detailContent.querySelector('[data-careers-back]');
+      if (backBtn) backBtn.addEventListener('click', closeDetail);
+
+      // Initialize Form Toggle Button (The big Apply button)
+      const toggleBtn = detailContent.querySelector('[data-toggle-form]');
+      const formWrapper = detailContent.querySelector('.careers-inline-form-wrapper');
+
+      if (toggleBtn && formWrapper) {
+          toggleBtn.addEventListener('click', () => {
+              const isHidden = formWrapper.hidden;
+              formWrapper.hidden = !isHidden;
+              if (isHidden) {
+                  // If opening, scroll to form
+                  formWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  toggleBtn.textContent = "Close Application";
+              } else {
+                  toggleBtn.textContent = "{{ section.settings.apply_button_label }}";
+              }
+          });
+      }
+
+      // Handle Auto-Scroll (if clicked from the List View Pill)
+      if (autoScrollToForm && toggleBtn && formWrapper) {
+          // Immediately show form
+          formWrapper.hidden = false;
+          toggleBtn.textContent = "Close Application";
+          
+          // Scroll logic needs a slight delay for layout to paint
+          setTimeout(() => {
+             formWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 100);
+      } else {
+          // Standard open: scroll to top of detail panel
+          const rect = detailPanel.getBoundingClientRect();
+          const absoluteTop = window.scrollY + rect.top - 40;
+          window.scrollTo({ top: absoluteTop, behavior: 'smooth' });
+      }
+    }
+
+    /* --- 2. CARD CLICK LISTENERS --- */
+    jobCards.forEach((card) => {
+      // General Card Click -> Opens Details
+      card.addEventListener('click', (e) => {
+         // If user clicked the "Apply Pill" inside the card
+         if(e.target.closest('[data-trigger-apply]')) {
+             e.preventDefault();
+             e.stopPropagation();
+             openJob(card, true); // true = auto open form
+         } else {
+             openJob(card, false);
+         }
+      });
+
+      card.addEventListener('keydown', (evt) => {
+        if (evt.key === 'Enter' || evt.key === ' ') {
+          evt.preventDefault();
+          openJob(card);
+        }
+      });
+    });
+
+    /* --- 3. FILTER LOGIC --- */
+    filterButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const filter = btn.getAttribute('data-careers-filter');
+        if (root.classList.contains('is-detail-open')) closeDetail();
+
+        filterButtons.forEach((b) => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+
+        jobCards.forEach((card) => {
+          const cat = card.getAttribute('data-careers-category');
+          card.style.display = (filter === 'all' || cat === filter) ? '' : 'none';
+        });
+
+        groups.forEach((group) => {
+          const cardsInGroup = group.querySelectorAll('[data-careers-job]');
+          let visibleCount = 0;
+          cardsInGroup.forEach(c => { if(c.style.display !== 'none') visibleCount++; });
+          group.style.display = visibleCount ? '' : 'none';
+        });
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Careers",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Join our team" },
+    { "type": "text", "id": "subheading", "label": "Subtitle", "default": "Explore open roles." },
+    { "type": "text", "id": "small_heading", "label": "Top small heading", "default": "Who We Are" },
+    { "type": "text", "id": "department_heading", "label": "Departments heading", "default": "Departments" },
+    { "type": "text", "id": "filter_all_label", "label": "All filter label", "default": "All" },
+    { "type": "text", "id": "filter_corporate_label", "label": "Corporate filter label", "default": "Corporate" },
+    { "type": "text", "id": "filter_warehouse_label", "label": "Warehouse filter label", "default": "Warehouse & Fulfillment" },
+    { "type": "text", "id": "corporate_group_heading", "label": "Corporate group heading", "default": "Corporate" },
+    { "type": "text", "id": "warehouse_group_heading", "label": "Warehouse group heading", "default": "Warehouse & Fulfillment" },
+    { "type": "text", "id": "apply_button_label", "label": "Apply button label", "default": "Apply now" },
+    { "type": "text", "id": "back_label", "label": "Back button label", "default": "Back to jobs" },
+    { "type": "text", "id": "about_heading", "label": "About section heading", "default": "About this role" },
+    { "type": "text", "id": "qualifications_heading", "label": "Qualifications heading", "default": "Qualifications" },
+    { "type": "text", "id": "responsibilities_heading", "label": "Responsibilities heading", "default": "Key responsibilities" },
+    { "type": "text", "id": "benefits_heading", "label": "Benefits heading", "default": "Company benefits" },
+    { "type": "text", "id": "no_jobs_label", "label": "No jobs text", "default": "No roles available." },
+    { "type": "text", "id": "detail_placeholder_heading", "label": "Detail placeholder heading", "default": "Select a role to see details" },
+    { "type": "textarea", "id": "detail_placeholder_text", "label": "Detail placeholder text", "default": "Choose a job from the list." }
+  ],
+  "blocks": [
+    {
+      "type": "job",
+      "name": "Job",
+      "settings": [
+        { "type": "select", "id": "category", "label": "Category", "options": [ { "value": "corporate", "label": "Corporate" }, { "value": "warehouse", "label": "Warehouse & Fulfillment" } ], "default": "corporate" },
+        { "type": "text", "id": "title", "label": "Job title", "default": "Job title" },
+        { "type": "text", "id": "department_tag", "label": "Department tag", "default": "Corporate" },
+        { "type": "text", "id": "type_tag", "label": "Type tag", "default": "Full-time" },
+        { "type": "text", "id": "location_tag", "label": "Location tag", "default": "Colombo" },
+        { "type": "text", "id": "extra_tags", "label": "Extra tags", "default": "On-site" },
+        { "type": "richtext", "id": "about", "label": "About this role" },
+        { "type": "richtext", "id": "qualifications", "label": "Qualifications" },
+        { "type": "richtext", "id": "responsibilities", "label": "Responsibilities" },
+        { "type": "richtext", "id": "benefits", "label": "Benefits" },
+        { "type": "url", "id": "apply_url", "label": "Apply form URL", "info": "Ignored in this inline version." }
+      ]
+    }
+  ],
+  "presets": [ { "name": "Careers", "category": "Custom" } ]
+}
+{% endschema %}
